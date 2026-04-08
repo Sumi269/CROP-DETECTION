@@ -1,32 +1,61 @@
-export default function WeatherCard({ data }) {
-  if (!data) return null;
+import { useState } from "react";
+import WeatherCard from "../components/WeatherCard";
+
+export default function Weather() {
+  const [city, setCity] = useState("");
+  const [data, setData] = useState(null);
+
+  const API_KEY = "YOUR_API_KEY"; // put your API key
+
+  const fetchWeather = async () => {
+    try {
+      const res = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
+      );
+
+      const result = await res.json();
+
+      // convert into your WeatherCard format
+      const formatted = {
+        temp: result.main.temp,
+        humidity: result.main.humidity,
+        rain: result.weather[0].description,
+        alert:
+          result.main.temp > 35
+            ? "⚠ High temperature - risk for crops"
+            : result.weather[0].main === "Rain"
+            ? "🌧 Rain expected - reduce irrigation"
+            : "✅ Weather is good for crops",
+      };
+
+      setData(formatted);
+    } catch (err) {
+      alert("Error fetching weather");
+    }
+  };
 
   return (
-    <div className="p-5 rounded-2xl shadow-lg bg-green-50 border border-green-200">
-      <h2 className="text-xl font-bold text-green-700 mb-3">
-        🌦️ Crop Weather Insights
-      </h2>
+    <div className="p-6">
+      <h1 className="text-xl font-bold mb-4">🌦 Weather for Crops</h1>
 
-      <div className="space-y-1 text-gray-700">
-        <p>🌡 Temperature: <b>{data.temp}°C</b></p>
-        <p>💧 Humidity: <b>{data.humidity}%</b></p>
-        <p>🌧 Rainfall: <b>{data.rain} mm</b></p>
-        <p>🌬 Wind Speed: <b>{data.wind} km/h</b></p>
+      <input
+        type="text"
+        placeholder="Enter city"
+        className="border p-2 mr-2"
+        value={city}
+        onChange={(e) => setCity(e.target.value)}
+      />
+
+      <button
+        onClick={fetchWeather}
+        className="bg-green-500 text-white px-4 py-2"
+      >
+        Get Weather
+      </button>
+
+      <div className="mt-5">
+        <WeatherCard data={data} />
       </div>
-
-      {/* Crop Alert */}
-      {data.alert && (
-        <div className="mt-3 p-2 bg-red-100 text-red-600 rounded">
-          ⚠️ {data.alert}
-        </div>
-      )}
-
-      {/* Farming Suggestion */}
-      {data.advice && (
-        <div className="mt-3 p-2 bg-green-100 text-green-700 rounded">
-          🌱 {data.advice}
-        </div>
-      )}
     </div>
   );
 }
