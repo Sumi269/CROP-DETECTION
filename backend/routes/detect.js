@@ -26,7 +26,7 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
     // 1. Send image to Python Microservice (Runs on port 5001 now)
     const filePath = path.join(__dirname, '..', req.file.path);
     const formData = new FormData();
-    formData.append('file', fs.createReadStream(filePath));
+    formData.append('image', fs.createReadStream(filePath));
 
     // Calling Python service
     let aiResult;

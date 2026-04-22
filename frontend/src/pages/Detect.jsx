@@ -36,32 +36,38 @@ export default function Detect() {
   };
 
   const sendToBackend = async (file) => {
-    setLoading(true);
-    setResult(null);
-    const formData = new FormData();
-    formData.append("image", file); // Multer is looking for "image" field
+  setLoading(true);
+  setResult(null);
 
-    try {
-      const res = await fetch("http://localhost:5000/api/detect", {
-        method: "POST",
-        headers: {
-            "Authorization": `Bearer ${localStorage.getItem("token")}`
-        },
-        body: formData,
-      });
+  const formData = new FormData();
 
-      const data = await res.json();
-      if (!res.ok) {
-          alert(data.error || "Failed to detect");
-      } else {
-          setResult(data);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Prediction failed. Ensure Node.js backend is running.");
+  // MUST BE "image"
+  formData.append("image", file);
+
+  try {
+    const res = await fetch("http://localhost:5000/predict", {
+  method: "POST",
+  headers: {
+    "Authorization": `Bearer ${localStorage.getItem("token")}`
+  },
+  body: formData,
+});
+    const data = await res.json();
+
+    console.log("Backend response:", data);
+
+    if (!res.ok) {
+      alert(data.error || "Failed");
+    } else {
+      setResult(data);
     }
-    setLoading(false);
-  };
+  } catch (err) {
+    console.log("ERROR:", err);
+    alert("Server not reachable");
+  }
+
+  setLoading(false);
+};
 
   return (
     <div className="min-h-screen bg-slate-900 pt-24 pb-12 px-6">
